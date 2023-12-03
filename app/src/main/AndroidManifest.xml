@@ -16,6 +16,9 @@
         android:theme="@style/Theme.StorySearch"
         tools:targetApi="31">
         <activity
+            android:name=".AdminPanel"
+            android:exported="false" />
+        <activity
             android:name=".StoryDisplay"
             android:exported="false" />
         <activity
