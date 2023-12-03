@@ -7,12 +7,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SearchScreen extends AppCompatActivity {
 
@@ -32,7 +36,7 @@ public class SearchScreen extends AppCompatActivity {
         python = Python.getInstance();
 
         final EditText userQueryEditText = findViewById(R.id.UserQuery);
-        Button searchButton = findViewById(R.id.button);
+        Button searchButton = findViewById(R.id.SearchButton);
 
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,23 +47,23 @@ public class SearchScreen extends AppCompatActivity {
                     showToast("Please enter a query");
                 } else {
                     // Call the Python function with the user query
-                    List<String> documentNames = callPythonFunction(userQuery);
+                    List<Integer> documentIDs = callPythonFunction(userQuery);
 
-                    // Display the retrieved document names (replace with your UI logic)
-                    showToast("Documents: " + documentNames.toString());
+
+                    // Update the SearchResultsFragment with the search results
+                    updateSearchResultsFragment(documentIDs,userQuery);
                 }
             }
         });
     }
 
-    private List<String> callPythonFunction(String userQuery) {
+    private List<Integer> callPythonFunction(String userQuery) {
         Python python = Python.getInstance();
         PyObject pythonCodeModule = python.getModule("PythonCode");
 
         PyObject contentListObj = pythonCodeModule.callAttr("read_csv_content", appContext);
 
-        List<String> documentNames = new ArrayList<>();
-
+        List<Integer> searchResults=new ArrayList<>();
         if (contentListObj != null) {
             // Call the connect_to_database function
             PyObject conn = pythonCodeModule.callAttr("connect_to_database", appContext, contentListObj);
@@ -70,21 +74,46 @@ public class SearchScreen extends AppCompatActivity {
             // Call the create_index function with the index_path
             pythonCodeModule.callAttr("create_index", conn, index_path);
 
-            // Call the search_documents function (example usage)
-            List<PyObject> searchResults = pythonCodeModule.callAttr("search_documents",  index_path, userQuery, appContext).asList();
+            List<PyObject> pythonList = pythonCodeModule.callAttr("search_documents", index_path, userQuery, appContext).asList();
+            searchResults = new ArrayList<>();
 
-            for (PyObject result : searchResults)
-            {
-                documentNames.add(result.toJava(String.class));
+            for (PyObject item : pythonList) {
+                // Convert each PyObject to Java and then to Integer
+                try {
+                    Integer result = item.toJava(Integer.class);
+                    searchResults.add(result);
+                } catch (ClassCastException e) {
+                    String stringValue = item.toJava(String.class);
+                    try {
+                        Integer result = Integer.parseInt(stringValue);
+                        searchResults.add(result);
+                    } catch (NumberFormatException ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
-            System.out.println("Search Results: " + documentNames);
+            System.out.println("Search Results: " + searchResults);
+
+
         }
 
-        return documentNames;
+        return searchResults;
     }
 
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateSearchResultsFragment(List<Integer> documentIDs, String userQuery) {
+        // Create a new instance of SearchResultsFragment
+        SearchResultsFragment searchResultsFragment = SearchResultsFragment.newInstance(userQuery, documentIDs);
+
+        // Replace the existing fragment with the new SearchResultsFragment
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragmentContainerView, searchResultsFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 }
