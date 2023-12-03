@@ -1,10 +1,12 @@
 package com.midterm.storysearch;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
@@ -16,7 +18,6 @@ import com.chaquo.python.android.AndroidPlatform;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SearchScreen extends AppCompatActivity {
 
@@ -37,6 +38,17 @@ public class SearchScreen extends AppCompatActivity {
 
         final EditText userQueryEditText = findViewById(R.id.UserQuery);
         Button searchButton = findViewById(R.id.SearchButton);
+        TextView adminPanel = findViewById(R.id.moveToAdminScreen);
+
+        adminPanel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Define the intent to start the AdminPanel activity
+                Intent intent = new Intent(SearchScreen.this, AdminPanel.class);
+                startActivity(intent);
+            }
+        });
+
 
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
