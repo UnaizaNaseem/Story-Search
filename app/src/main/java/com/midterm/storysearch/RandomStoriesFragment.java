@@ -51,10 +51,8 @@ public class RandomStoriesFragment extends Fragment {
     }
 
     private boolean tryOpenCorpus(Context context) {
-        // Define the path to the corpus database
         String dbPath = context.getFilesDir() + "/corpus.db";
 
-        // Check if the database file exists
         File dbFile = new File(dbPath);
         if (!dbFile.exists()) {
             return false;
@@ -68,7 +66,6 @@ public class RandomStoriesFragment extends Fragment {
         db.close();
         return true;
     }
-
 
 
     private void displayRandomStories(View view) {
