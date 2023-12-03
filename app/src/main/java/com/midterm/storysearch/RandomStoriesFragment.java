@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -31,7 +30,6 @@ public class RandomStoriesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_random_stories, container, false);
 
-        // Retrieve 5 random stories from the database
         getRandomDocIds(view.getContext());
         Button randomizeBtn = view.findViewById(R.id.btnRandom);
 
@@ -51,16 +49,13 @@ public class RandomStoriesFragment extends Fragment {
     private void displayRandomStories(View view) {
         ListView listViewRandomStories = view.findViewById(R.id.listViewRandomStories);
 
-        // Create a custom adapter to bind data to the ListView
         StoryAdapter adapter = new StoryAdapter(requireContext(), getStoryNamesWithStartingLines(requireContext()));
-        // Set the adapter to the ListView
+
         listViewRandomStories.setAdapter(adapter);
 
-        // Set an OnItemClickListener to handle clicks on the items
         listViewRandomStories.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Open the story in a new screen using the selected docId
                 int selectedDocId = randomDocIds.get(position);
                 openStoryScreen(selectedDocId);
             }
@@ -70,10 +65,8 @@ public class RandomStoriesFragment extends Fragment {
 
     private String getStartingLine(String content) {
         if (content != null) {
-            // Extract the starting line from the content
-            // You can customize this based on your story content structure
             String[] words = content.split("\\s+");
-            int maxWords = 20; // Set the maximum number of words for the starting line
+            int maxWords = 20;
 
             StringBuilder startingLine = new StringBuilder();
 
@@ -81,7 +74,6 @@ public class RandomStoriesFragment extends Fragment {
                 startingLine.append(words[i]).append(" ");
             }
 
-            // Add "..." at the end if there are more words in the story
             if (words.length > maxWords) {
                 startingLine.append("...");
             }
@@ -108,23 +100,19 @@ public class RandomStoriesFragment extends Fragment {
     }
 
     private void getRandomDocIds(Context context) {
-        // Initialize or clear the list
         if (randomDocIds == null) {
             randomDocIds = new ArrayList<>();
         } else {
             randomDocIds.clear();
         }
 
-        // Open the database
         SQLiteDatabase db = connectToDatabase(context);
         if (db == null) {
             return;
         }
 
-        // Get the total number of stories
         int totalStories = getTotalStories(db);
 
-        // Generate 5 unique random numbers as docIds
         Random random = new Random();
         while (randomDocIds.size() < 5) {
             int randomDocId = random.nextInt(totalStories) + 1; // Assuming docIds start from 1
@@ -133,12 +121,11 @@ public class RandomStoriesFragment extends Fragment {
             }
         }
 
-        // Close the database
         db.close();
     }
 
     private int getTotalStories(SQLiteDatabase db) {
-        // Get the total number of stories from the database
+
         Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM documents", null);
         cursor.moveToFirst();
         int totalStories = cursor.getInt(0);
@@ -158,13 +145,13 @@ public class RandomStoriesFragment extends Fragment {
                     String storyName = cursor.getString(0);
                     String content = cursor.getString(1);
 
-                    // Check if story name or content is empty
+
                     if (storyName == null || storyName.isEmpty() || content == null || content.isEmpty()) {
-                        // Find another random story as a replacement
+
                         int replacementDocId = findRandomDocId(db, randomDocIds);
-                        randomDocIds.set(i, replacementDocId); // Replace the current docId
+                        randomDocIds.set(i, replacementDocId);
                         cursor.close();
-                        continue; // Skip the current iteration and process the replacement
+                        continue;
                     }
 
                     String startingLine = getStartingLine(content);
@@ -181,10 +168,9 @@ public class RandomStoriesFragment extends Fragment {
         Random random = new Random();
         int totalStories = getTotalStories(db);
 
-        // Generate a unique random number as docId excluding the specified docIds
         int randomDocId;
         do {
-            randomDocId = random.nextInt(totalStories) + 1; // Assuming docIds start from 1
+            randomDocId = random.nextInt(totalStories) + 1;
         } while (excludeDocIds.contains(randomDocId));
 
         return randomDocId;

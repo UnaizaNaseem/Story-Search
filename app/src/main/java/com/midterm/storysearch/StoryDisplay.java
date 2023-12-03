@@ -27,7 +27,7 @@ public class StoryDisplay extends AppCompatActivity {
         if (selectedDocId != -1) {
             setStory(this, findViewById(android.R.id.content), selectedDocId);
         } else {
-            // Handle the case when no docId is provided
+
         }
     }
 
@@ -46,12 +46,10 @@ public class StoryDisplay extends AppCompatActivity {
                 String storyName = cursor.getString(0);
                 String content = cursor.getString(1);
 
-                // Check if story name or content is empty
                 if (storyName == null || storyName.isEmpty() || content == null || content.isEmpty()) {
-                    // Show an error toast
+
                     Toast.makeText(context, "Error: Empty story name or content", Toast.LENGTH_SHORT).show();
 
-                    // Finish the current activity and return to the previous screen
                     finish();
                     return;
                 } else {
