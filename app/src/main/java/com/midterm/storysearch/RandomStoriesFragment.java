@@ -14,6 +14,7 @@ import android.widget.ListView;
 
 import androidx.fragment.app.Fragment;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -30,13 +31,17 @@ public class RandomStoriesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_random_stories, container, false);
 
+        if (!tryOpenCorpus(view.getContext())) {
+            return view;
+        }
+
         getRandomDocIds(view.getContext());
         Button randomizeBtn = view.findViewById(R.id.btnRandom);
 
         randomizeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onRandomizeButtonClick(v); // Remove the argument 'view'
+                onRandomizeButtonClick(v);
             }
         });
 
@@ -44,6 +49,26 @@ public class RandomStoriesFragment extends Fragment {
 
         return view;
     }
+
+    private boolean tryOpenCorpus(Context context) {
+        // Define the path to the corpus database
+        String dbPath = context.getFilesDir() + "/corpus.db";
+
+        // Check if the database file exists
+        File dbFile = new File(dbPath);
+        if (!dbFile.exists()) {
+            return false;
+        }
+
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
+        if (db == null) {
+            return false;
+        }
+
+        db.close();
+        return true;
+    }
+
 
 
     private void displayRandomStories(View view) {
