@@ -1,4 +1,0 @@
-<!-- res/drawable/burnt_paper_background.xml -->
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/burnt_paper"
-    android:tileMode="repeat" />

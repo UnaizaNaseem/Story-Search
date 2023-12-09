@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <include layout="@layout/loading_screen" />
+
 
     <ImageView
         android:id="@+id/logoImageView"

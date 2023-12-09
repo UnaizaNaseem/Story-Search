@@ -11,7 +11,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,10 +56,25 @@ public class SearchResultsFragment extends Fragment {
         TextView titleTextView = view.findViewById(R.id.header);
         titleTextView.setText("Showing Results for: " + searchQuery);
 
-        displaySearchedStories(view,documentIDs);
+        displaySearchedStories(view, documentIDs);
+
+        // Override the onBackPressed callback
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Clear the back stack
+                requireActivity().getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+                // Create a new instance of SearchScreen
+                Intent intent = new Intent(requireContext(), SearchScreen.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
 
         return view;
     }
+
 
     private SQLiteDatabase connectToDatabase(Context context) {
         // Open the database
@@ -73,11 +92,33 @@ public class SearchResultsFragment extends Fragment {
         listViewRandomStories.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Open the story in a new screen using the selected docId
                 int selectedDocId = documentIDs.get(position);
-                openStoryScreen(selectedDocId);
+
+                // Assuming you have an adapter attached to the listViewRandomStories
+                StoryAdapter adapter = (StoryAdapter) parent.getAdapter();
+
+                if (adapter != null) {
+                    // Get the story information directly from the adapter
+                    String storyDetails = adapter.getItem(position);
+
+                    // Split the story details using the newline character
+                    String[] storyInfo = storyDetails.split("\n");
+
+                    if (storyInfo.length >= 2) {
+                        // Extract story name and starting line
+                        String storyName = storyInfo[0];
+                        String startingLine = storyInfo[1];
+
+                        RecentStoriesManager recentStoriesManager = RecentStoriesManager.getInstance();
+                        RecentStoriesManager.RecentStory recentStory = new RecentStoriesManager.RecentStory(selectedDocId, storyName, startingLine);
+                        recentStoriesManager.addRecentStory(recentStory);
+
+                        openStoryScreen(selectedDocId);
+                    }
+                }
             }
         });
+
     }
     private List<String> getStoryNamesWithStartingLines(Context context) {
         List<String> storyNamesWithStartingLines = new ArrayList<>();
