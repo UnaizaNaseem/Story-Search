@@ -6,19 +6,18 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.Spanned;
+import android.util.TypedValue;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.text.HtmlCompat;
 
-import java.util.List;
-
-import me.biubiubiu.justifytext.library.JustifyTextView;
-
 public class StoryDisplay extends AppCompatActivity {
 
+    private TextView storyContentView; // Declare the TextView for story content
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,9 +29,9 @@ public class StoryDisplay extends AppCompatActivity {
 
         if (selectedDocId != -1) {
             View rootView = findViewById(android.R.id.content);
-            setStory(this, rootView, selectedDocId);
+            initializeViews(rootView, selectedDocId);
         } else {
-
+            // Handle the case where selectedDocId is -1
         }
     }
 
@@ -40,6 +39,55 @@ public class StoryDisplay extends AppCompatActivity {
         // Open the database
         String dbPath = context.getFilesDir() + "/corpus.db";
         return SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
+    }
+
+    private void initializeViews(View rootView, int selectedDocId) {
+        TextView nameView = rootView.findViewById(R.id.StoryName);
+        storyContentView = rootView.findViewById(R.id.StoryContent);
+
+        // Initialize increase and decrease font size buttons
+        ImageButton increaseFontSizeButton = rootView.findViewById(R.id.increaseFontSizeButton);
+        ImageButton decreaseFontSizeButton = rootView.findViewById(R.id.decreaseFontSizeButton);
+
+        // Set click listeners for font size buttons
+        increaseFontSizeButton.setOnClickListener(v -> increaseFontSize());
+        decreaseFontSizeButton.setOnClickListener(v -> decreaseFontSize());
+
+        setStory(this, rootView, selectedDocId);
+    }
+
+    private static final float MIN_FONT_SIZE = 35; // Adjust the minimum font size as needed
+    private static final float MAX_FONT_SIZE = 100; // Adjust the maximum font size as needed
+
+    private static final float FONT_SCALE_FACTOR = 1.1f; // Adjust the scale factor as needed
+
+    private void increaseFontSize() {
+        // Increase the font size gradually
+        float currentSize = storyContentView.getTextSize();
+        float newSize = currentSize * FONT_SCALE_FACTOR;
+
+        if (newSize <= MAX_FONT_SIZE) {
+            storyContentView.setTextSize(TypedValue.COMPLEX_UNIT_PX, newSize);
+        } else {
+            // Handle the case where the new size is greater than the maximum size
+            Toast.makeText(this, "Max font size reached", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+
+    private void decreaseFontSize() {
+        // Decrease the font size gradually
+        float currentSize = storyContentView.getTextSize();
+        float newSize = currentSize * 0.9f; // Decrease by 10%
+
+        if (newSize >= MIN_FONT_SIZE) {
+            storyContentView.setTextAppearance(android.R.style.TextAppearance_Medium); // Reset to medium size
+            storyContentView.setTextSize(newSize / getResources().getDisplayMetrics().density);
+        } else {
+            // Handle the case where the new size is less than the minimum size
+        }
     }
 
 
@@ -56,7 +104,9 @@ public class StoryDisplay extends AppCompatActivity {
                     // Handle the case where storyName or content is empty
                 } else {
                     TextView nameView = view.findViewById(R.id.StoryName);
-                    JustifyTextView storyContentView = view.findViewById(R.id.StoryContent);
+                    TextView storyContentView = view.findViewById(R.id.StoryContent);
+
+                    nameView.setText(storyName);
 
                     // Replace newline characters with HTML line break tags
                     content = content.replace("\n", "<br>");
@@ -67,7 +117,6 @@ public class StoryDisplay extends AppCompatActivity {
                     // Convert the SpannedString to a String
                     String plainTextContent = formattedContent.toString();
 
-                    nameView.setText(storyName);
                     storyContentView.setText(plainTextContent);
                 }
             } else {
@@ -79,5 +128,4 @@ public class StoryDisplay extends AppCompatActivity {
             // Handle the case where the database is null
         }
     }
-
 }

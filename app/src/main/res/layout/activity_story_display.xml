@@ -8,19 +8,54 @@
     tools:context=".StoryDisplay">
 
     <LinearLayout
+        android:id="@+id/parentLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="10dp">
 
-        <TextView
-            android:id="@+id/StoryName"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/topBar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Story name here"
-            android:layout_gravity="center"
-            android:textSize="30sp"
-            android:layout_marginBottom="10dp"/>
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:id="@+id/StoryName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Story name here"
+                android:textSize="30sp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"/>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_below="@+id/StoryName"
+   >
+            <ImageButton
+                android:id="@+id/decreaseFontSizeButton"
+                android:layout_marginTop="38dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_minus_font"
+                android:background="?android:attr/selectableItemBackground"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="20dp"/>
+
+            <ImageButton
+                android:id="@+id/increaseFontSizeButton"
+                android:layout_marginTop="38dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_plus_font"
+                android:background="?android:attr/selectableItemBackground"
+                android:layout_toLeftOf="@id/increaseFontSizeButton"
+                android:layout_centerVertical="true"/>
+</LinearLayout>
+        </RelativeLayout>
 
         <ScrollView
             android:layout_width="match_parent"
@@ -28,15 +63,13 @@
             android:layout_weight="1"
             android:gravity="center">
 
-            <me.biubiubiu.justifytext.library.JustifyTextView
+            <TextView
                 android:id="@+id/StoryContent"
                 android:padding="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
                 android:text="Story here"
                 android:textSize="17sp"/>
-
 
         </ScrollView>
 
