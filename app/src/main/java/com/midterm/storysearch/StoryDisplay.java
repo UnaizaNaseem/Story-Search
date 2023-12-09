@@ -5,13 +5,17 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.text.Spanned;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.text.HtmlCompat;
 
 import java.util.List;
+
+import me.biubiubiu.justifytext.library.JustifyTextView;
 
 public class StoryDisplay extends AppCompatActivity {
 
@@ -25,7 +29,8 @@ public class StoryDisplay extends AppCompatActivity {
         int selectedDocId = intent.getIntExtra("selectedDocId", -1);
 
         if (selectedDocId != -1) {
-            setStory(this, findViewById(android.R.id.content), selectedDocId);
+            View rootView = findViewById(android.R.id.content);
+            setStory(this, rootView, selectedDocId);
         } else {
 
         }
@@ -37,6 +42,7 @@ public class StoryDisplay extends AppCompatActivity {
         return SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
     }
 
+
     private void setStory(Context context, View view, int docId) {
         SQLiteDatabase db = connectToDatabase(context);
         if (db != null) {
@@ -47,20 +53,30 @@ public class StoryDisplay extends AppCompatActivity {
                 String content = cursor.getString(1);
 
                 if (storyName == null || storyName.isEmpty() || content == null || content.isEmpty()) {
-
-                    Toast.makeText(context, "Error: Empty story name or content", Toast.LENGTH_SHORT).show();
-
-                    finish();
-                    return;
+                    // Handle the case where storyName or content is empty
                 } else {
                     TextView nameView = view.findViewById(R.id.StoryName);
-                    TextView storyContentView = view.findViewById(R.id.StoryContent);
+                    JustifyTextView storyContentView = view.findViewById(R.id.StoryContent);
+
+                    // Replace newline characters with HTML line break tags
+                    content = content.replace("\n", "<br>");
+
+                    // Use HtmlCompat to handle HTML tags
+                    Spanned formattedContent = HtmlCompat.fromHtml(content, HtmlCompat.FROM_HTML_MODE_LEGACY);
+
+                    // Convert the SpannedString to a String
+                    String plainTextContent = formattedContent.toString();
+
                     nameView.setText(storyName);
-                    storyContentView.setText(content);
+                    storyContentView.setText(plainTextContent);
                 }
+            } else {
+                // Handle the case where the cursor doesn't move to the first position
             }
             cursor.close();
             db.close();
+        } else {
+            // Handle the case where the database is null
         }
     }
 

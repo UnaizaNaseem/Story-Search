@@ -45,7 +45,13 @@ public class RandomStoriesFragment extends Fragment {
             }
         });
 
-        displayRandomStories(view);
+        // Display random stories and wait for the UI to be fully updated
+        view.post(new Runnable() {
+            @Override
+            public void run() {
+                displayRandomStories(view);
+            }
+        });
 
         return view;
     }
@@ -154,31 +160,32 @@ public class RandomStoriesFragment extends Fragment {
         cursor.close();
         return totalStories;
     }
-
     private List<String> getStoryNamesWithStartingLines(Context context) {
         List<String> storyNamesWithStartingLines = new ArrayList<>();
         SQLiteDatabase db = connectToDatabase(context);
+
         if (db != null) {
             for (int i = 0; i < randomDocIds.size(); i++) {
                 int docId = randomDocIds.get(i);
                 String query = "SELECT name, content FROM documents WHERE id = ?";
                 Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(docId)});
+
                 if (cursor.moveToFirst()) {
                     String storyName = cursor.getString(0);
                     String content = cursor.getString(1);
 
-
-                    if (storyName == null || storyName.isEmpty() || content == null || content.isEmpty()) {
-
+                    // Check if the story is valid
+                    if (isValidStory(storyName, content)) {
+                        String startingLine = getStartingLine(content);
+                        storyNamesWithStartingLines.add(storyName + "\n" + startingLine);
+                    } else {
+                        // Replace problematic story with a new random one
                         int replacementDocId = findRandomDocId(db, randomDocIds);
                         randomDocIds.set(i, replacementDocId);
-                        cursor.close();
-                        continue;
+                        i--; // Adjust the index to recheck the replaced story
                     }
-
-                    String startingLine = getStartingLine(content);
-                    storyNamesWithStartingLines.add(storyName + "\n" + startingLine);
                 }
+
                 cursor.close();
             }
             db.close();
@@ -186,6 +193,10 @@ public class RandomStoriesFragment extends Fragment {
         return storyNamesWithStartingLines;
     }
 
+    private boolean isValidStory(String storyName, String content) {
+        return storyName != null && !storyName.isEmpty() &&
+                content != null && !content.isEmpty();
+    }
     private int findRandomDocId(SQLiteDatabase db, List<Integer> excludeDocIds) {
         Random random = new Random();
         int totalStories = getTotalStories(db);
