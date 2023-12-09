@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import androidx.fragment.app.Fragment;
@@ -36,12 +37,12 @@ public class RandomStoriesFragment extends Fragment {
         }
 
         getRandomDocIds(view.getContext());
-        Button randomizeBtn = view.findViewById(R.id.btnRandom);
-
-        randomizeBtn.setOnClickListener(new View.OnClickListener() {
+        ImageView reloadButton = view.findViewById(R.id.ReloadButton);
+        reloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                onRandomizeButtonClick(v);
+            public void onClick(View view)
+            {
+                onRandomizeButtonClick(view);
             }
         });
 

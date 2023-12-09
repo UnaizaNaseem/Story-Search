@@ -1,14 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.StorySearch" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/old_paper_gradient</item>
+        <item name="android:fontFamily">@font/splendid66 </item>
+        <item name="android:textColor">@color/appFontColor</item>
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimary">@color/appFontColor</item>
+        <item name="colorPrimaryVariant">@color/appFontColor</item>
+        <item name="colorOnPrimary">@color/appFontColor</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorSecondary">@color/appFontColor</item>
+        <item name="colorSecondaryVariant">@color/appFontColor</item>
+        <item name="colorOnSecondary">@color/appFontColor</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->

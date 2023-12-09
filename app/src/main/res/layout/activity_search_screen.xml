@@ -14,12 +14,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="18dp"
+            android:layout_marginBottom="18dp"
             android:text="Story Search"
-            android:textSize="24sp"
+            android:textSize="35sp"
             android:textStyle="bold" />
 
-        <!-- Search Box -->
         <EditText
             android:id="@+id/UserQuery"
             android:layout_width="match_parent"
@@ -29,9 +29,10 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:hint="Type your search here"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textSize="20sp"/>
 
-        <!-- Search Button -->
+
         <Button
             android:id="@+id/SearchButton"
             android:layout_width="wrap_content"
@@ -39,7 +40,12 @@
             android:layout_below="@id/UserQuery"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="16dp"
-            android:text="Search" />
+            android:textSize="18sp"
+            android:padding="5dp"
+            android:backgroundTint="@color/light_brown"
+            android:text="Search"
+            android:textColor="@color/appFontColor" />
+
 
 
         <FrameLayout
@@ -64,10 +70,10 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/middleContainer"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:text="Go to Admin Panel"
             android:gravity="right"
-            android:textSize="10dp"/>
+            android:textSize="15dp"/>
 
     </RelativeLayout>
 
