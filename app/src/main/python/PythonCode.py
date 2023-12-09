@@ -94,50 +94,46 @@ def create_index(conn, index_path):
         print("Index file created successfully.")
 
 def search_documents(index_path, query, context, max_distance=15):
+    ranked_doc_ids = rank_documents(index_path, query, context, max_distance)
+    return ranked_doc_ids
+
+# Add the rank_documents and get_document_titles functions here
+
+def rank_documents(index_path, query, context, max_distance=15):
     words = word_tokenize(query)
     df = pd.read_csv(index_path)
-    closest_matches = {}
+    document_scores = {}
 
     for word in words:
         if word in df['word'].values:
             doc_ids = ast.literal_eval(df[df['word'] == word]['doc_ids'].iloc[0])
-            closest_matches[word] = doc_ids
-        else:
-            word_distances = [(existing_word, fuzz.token_sort_ratio(word, existing_word)) for existing_word in df['word'].values]
-            closest_word, min_distance = max(word_distances, key=lambda x: x[1])
+            for doc_id in doc_ids:
+                document_scores[doc_id] = document_scores.get(doc_id, 0) + 1
 
-            if min_distance >= max_distance:
-                doc_ids = ast.literal_eval(df[df['word'] == closest_word]['doc_ids'].iloc[0])
-                closest_matches[word] = doc_ids
+    sorted_documents = sorted(document_scores.items(), key=lambda x: x[1], reverse=True)
+    ranked_doc_ids = [doc_id for doc_id, _ in sorted_documents]
 
-    doc_ids_list = [doc_id for doc_ids in closest_matches.values() for doc_id in doc_ids]
-    doc_ids_list = list(set(doc_ids_list))
-    doc_ids_list = [int(doc_id) for doc_id in doc_ids_list]
+    return ranked_doc_ids
 
-    db_path = "/data/user/0/com.midterm.storysearch/files/corpus.db"
+def get_document_titles(context, doc_ids):
+    db_path = os.path.join(str(context.getFilesDir()), "corpus.db")
     titles = []
 
     with sqlite3.connect(db_path) as conn:
         cursor = conn.cursor()
 
-        sql_query = f'SELECT id, name FROM documents WHERE id IN {tuple(doc_ids_list)}'
+        sql_query = f'SELECT id, name FROM documents WHERE id IN {tuple(doc_ids)}'
         cursor.execute(sql_query)
         result = cursor.fetchall()
 
         id_to_title = dict(result)
 
-        for doc_id in doc_ids_list:
-            print("Processing doc_id:", doc_id)
-
+        for doc_id in doc_ids:
             title = id_to_title.get(doc_id)
-
             if title:
                 titles.append(title)
-            else:
-                print(f"No result for doc_id {doc_id}")
 
-    print("Doc Titles:", titles)
-    return doc_ids_list
+    return titles
 
 def remove_story_from_database(story_name):
     conn = sqlite3.connect("/data/user/0/com.midterm.storysearch/files/corpus.db")
