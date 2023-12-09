@@ -3,9 +3,13 @@ package com.midterm.storysearch;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +27,7 @@ public class SearchScreen extends AppCompatActivity {
 
     private Python python;
     private Context appContext;
+    private LoadingScreenFragment loadingScreenFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +54,14 @@ public class SearchScreen extends AppCompatActivity {
             }
         });
 
+        ImageView historyButton = findViewById(R.id.HistoryButton);
+        historyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                onHistoryButtonClick(view);
+            }
+        });
 
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,13 +70,23 @@ public class SearchScreen extends AppCompatActivity {
 
                 if (userQuery.isEmpty()) {
                     showToast("Please enter a query");
-                } else {
-                    // Call the Python function with the user query
-                    List<Integer> documentIDs = callPythonFunction(userQuery);
+                }
+                else
+                {
+                    showLoadingScreen();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Fetch search results and update the fragment
+                            List<Integer> documentIDs = callPythonFunction(userQuery);
 
+                            // Hide loading screen after results are fetched
+                            hideLoadingScreen();
 
-                    // Update the SearchResultsFragment with the search results
-                    updateSearchResultsFragment(documentIDs,userQuery);
+                            // Update the fragment after hiding the loading screen
+                            updateSearchResultsFragment(documentIDs, userQuery);
+                        }
+                    }, 600);
                 }
             }
         });
@@ -116,16 +139,64 @@ public class SearchScreen extends AppCompatActivity {
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
-
     private void updateSearchResultsFragment(List<Integer> documentIDs, String userQuery) {
+        // Clear the entire back stack
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+        // Create a new instance of RandomStoriesFragment
+        RandomStoriesFragment randomStoriesFragment = new RandomStoriesFragment();
+
+        // Replace the existing fragment with the new RandomStoriesFragment
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        fragmentTransaction.replace(R.id.fragmentContainerView, randomStoriesFragment);
+        fragmentTransaction.addToBackStack(RandomStoriesFragment.class.getName());
+
         // Create a new instance of SearchResultsFragment
         SearchResultsFragment searchResultsFragment = SearchResultsFragment.newInstance(userQuery, documentIDs);
 
         // Replace the existing fragment with the new SearchResultsFragment
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragmentContainerView, searchResultsFragment);
-        fragmentTransaction.addToBackStack(null);
+
         fragmentTransaction.commit();
     }
+
+
+
+
+
+    private void showLoadingScreen() {
+        // Create and show the loading screen fragment
+        loadingScreenFragment = new LoadingScreenFragment();
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        // Replace random stories fragment with loading screen fragment
+        fragmentTransaction.replace(R.id.fragmentContainerView, loadingScreenFragment);
+
+        fragmentTransaction.commit();
+    }
+
+
+
+    private void hideLoadingScreen() {
+        // Hide the loading screen fragment
+        if (loadingScreenFragment != null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.remove(loadingScreenFragment);
+            fragmentTransaction.commit();
+        }
+    }
+
+   private void  onHistoryButtonClick(View view)
+   {
+       Intent intent = new Intent(SearchScreen.this, ReadHistory.class);
+       startActivity(intent);
+   }
+
+
+
 }

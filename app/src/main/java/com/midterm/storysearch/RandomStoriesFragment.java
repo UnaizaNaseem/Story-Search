@@ -10,8 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import java.io.File;
@@ -36,12 +38,12 @@ public class RandomStoriesFragment extends Fragment {
         }
 
         getRandomDocIds(view.getContext());
-        Button randomizeBtn = view.findViewById(R.id.btnRandom);
-
-        randomizeBtn.setOnClickListener(new View.OnClickListener() {
+        ImageView reloadButton = view.findViewById(R.id.ReloadButton);
+        reloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                onRandomizeButtonClick(v);
+            public void onClick(View view)
+            {
+                onRandomizeButtonClick(view);
             }
         });
 
@@ -85,9 +87,33 @@ public class RandomStoriesFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int selectedDocId = randomDocIds.get(position);
-                openStoryScreen(selectedDocId);
+
+                // Assuming you have an adapter attached to the listViewRandomStories
+                StoryAdapter adapter = (StoryAdapter) parent.getAdapter();
+
+                if (adapter != null) {
+                    // Get the story information directly from the adapter
+                    String storyDetails = adapter.getItem(position);
+
+                    // Split the story details using the newline character
+                    String[] storyInfo = storyDetails.split("\n");
+
+                    if (storyInfo.length >= 2) {
+                        // Extract story name and starting line
+                        String storyName = storyInfo[0];
+                        String startingLine = storyInfo[1];
+
+                        RecentStoriesManager recentStoriesManager = RecentStoriesManager.getInstance();
+                        RecentStoriesManager.RecentStory recentStory = new RecentStoriesManager.RecentStory(selectedDocId, storyName, startingLine);
+                        recentStoriesManager.addRecentStory(recentStory);
+
+                        openStoryScreen(selectedDocId);
+                    }
+                }
             }
         });
+
+
     }
 
 
@@ -142,7 +168,7 @@ public class RandomStoriesFragment extends Fragment {
         int totalStories = getTotalStories(db);
 
         Random random = new Random();
-        while (randomDocIds.size() < 5) {
+        while (randomDocIds.size() < 4) {
             int randomDocId = random.nextInt(totalStories) + 1; // Assuming docIds start from 1
             if (!randomDocIds.contains(randomDocId)) {
                 randomDocIds.add(randomDocId);

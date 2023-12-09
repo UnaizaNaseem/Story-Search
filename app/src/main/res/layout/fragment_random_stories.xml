@@ -3,53 +3,46 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RandomStoriesFragment">
+    tools:context=".RandomStoriesFragment"
+    android:padding="20dp">
 
-    <!-- res/layout/fragment_random_stories.xml -->
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="16dp"
-        tools:context=".RandomStoriesFragment">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="top"
+        android:layout_marginBottom="20dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+
+        <TextView
+            android:id="@+id/TextView"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="For you:"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:gravity="left" />
-
-            <Button
-                android:id="@+id/btnRandom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="onRandomizeButtonClick"
-                android:text="reload"
-                android:gravity="center"
-                android:textSize="10sp"/>
-
-        </LinearLayout>
-
-        <ListView
-            android:id="@+id/listViewRandomStories"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-         android:layout_margin="10dp"
             android:layout_weight="1"
-            android:background="@android:color/white"
-            android:divider="@android:color/darker_gray"
-            android:dividerHeight="0.5dp"
-            android:listSelector="@android:color/darker_gray" />
+            android:text="Stories in a Glance"
+            android:textSize="20sp"
+            android:textColor="@color/appFontColor" />
+
+
+        <ImageView
+            android:id="@+id/ReloadButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_reload"
+            android:contentDescription="Reload Button"
+            android:clickable="true"
+            android:onClick="onReloadClick"/>
     </LinearLayout>
+
+    <ListView
+        android:id="@+id/listViewRandomStories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_weight="1"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="0.5dp"
+        android:listSelector="@android:color/darker_gray"/>
+
 </FrameLayout>

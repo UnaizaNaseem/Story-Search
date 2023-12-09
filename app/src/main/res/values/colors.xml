@@ -7,4 +7,7 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="appFontColor">#2E1409</color> <!-- RGB: 46, 20, 9 -->
+    <color name="light_brown">#986D61</color>
+
 </resources>
