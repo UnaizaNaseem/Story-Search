@@ -44,12 +44,20 @@ public class SearchScreen extends AppCompatActivity {
         final EditText userQueryEditText = findViewById(R.id.UserQuery);
         Button searchButton = findViewById(R.id.SearchButton);
         TextView adminPanel = findViewById(R.id.moveToAdminScreen);
+        TextView likedStories = findViewById(R.id.moveToLikedStories);
 
         adminPanel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Define the intent to start the AdminPanel activity
                 Intent intent = new Intent(SearchScreen.this, AdminPanel.class);
+                startActivity(intent);
+            }
+        });
+        likedStories.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SearchScreen.this, LikedStories.class);
                 startActivity(intent);
             }
         });
