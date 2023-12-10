@@ -9,7 +9,7 @@ import android.os.Handler;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final long SPLASH_TIMEOUT = 2000; // 2 seconds
+    private static final long SPLASH_TIMEOUT = 2000;  
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                // Start the main activity
+                 
                 Intent intent = new Intent(MainActivity.this, SearchScreen.class);
                 startActivity(intent);
                 finish();

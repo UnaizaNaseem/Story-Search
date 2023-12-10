@@ -49,7 +49,7 @@ public class SearchScreen extends AppCompatActivity {
         adminPanel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Define the intent to start the AdminPanel activity
+                 
                 Intent intent = new Intent(SearchScreen.this, AdminPanel.class);
                 startActivity(intent);
             }
@@ -85,13 +85,13 @@ public class SearchScreen extends AppCompatActivity {
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            // Fetch search results and update the fragment
+                             
                             List<Integer> documentIDs = callPythonFunction(userQuery);
 
-                            // Hide loading screen after results are fetched
+                             
                             hideLoadingScreen();
 
-                            // Update the fragment after hiding the loading screen
+                             
                             updateSearchResultsFragment(documentIDs, userQuery);
                         }
                     }, 600);
@@ -108,20 +108,20 @@ public class SearchScreen extends AppCompatActivity {
 
         List<Integer> searchResults=new ArrayList<>();
         if (contentListObj != null) {
-            // Call the connect_to_database function
+             
             PyObject conn = pythonCodeModule.callAttr("connect_to_database", appContext, contentListObj);
 
-            // Define the index_path variable
+             
             String index_path = "/data/user/0/com.midterm.storysearch/files/index.csv";
 
-            // Call the create_index function with the index_path
+             
             pythonCodeModule.callAttr("create_index", conn, index_path);
 
             List<PyObject> pythonList = pythonCodeModule.callAttr("search_documents", index_path, userQuery, appContext).asList();
             searchResults = new ArrayList<>();
 
             for (PyObject item : pythonList) {
-                // Convert each PyObject to Java and then to Integer
+                 
                 try {
                     Integer result = item.toJava(Integer.class);
                     searchResults.add(result);
@@ -148,23 +148,23 @@ public class SearchScreen extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
     private void updateSearchResultsFragment(List<Integer> documentIDs, String userQuery) {
-        // Clear the entire back stack
+         
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-        // Create a new instance of RandomStoriesFragment
+         
         RandomStoriesFragment randomStoriesFragment = new RandomStoriesFragment();
 
-        // Replace the existing fragment with the new RandomStoriesFragment
+         
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         fragmentTransaction.replace(R.id.fragmentContainerView, randomStoriesFragment);
         fragmentTransaction.addToBackStack(RandomStoriesFragment.class.getName());
 
-        // Create a new instance of SearchResultsFragment
+         
         SearchResultsFragment searchResultsFragment = SearchResultsFragment.newInstance(userQuery, documentIDs);
 
-        // Replace the existing fragment with the new SearchResultsFragment
+         
         fragmentTransaction.replace(R.id.fragmentContainerView, searchResultsFragment);
 
         fragmentTransaction.commit();
@@ -175,13 +175,13 @@ public class SearchScreen extends AppCompatActivity {
 
 
     private void showLoadingScreen() {
-        // Create and show the loading screen fragment
+         
         loadingScreenFragment = new LoadingScreenFragment();
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        // Replace random stories fragment with loading screen fragment
+         
         fragmentTransaction.replace(R.id.fragmentContainerView, loadingScreenFragment);
 
         fragmentTransaction.commit();
@@ -190,7 +190,7 @@ public class SearchScreen extends AppCompatActivity {
 
 
     private void hideLoadingScreen() {
-        // Hide the loading screen fragment
+         
         if (loadingScreenFragment != null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
