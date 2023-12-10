@@ -21,9 +21,9 @@ import java.util.List;
 
 public class StoryDisplay extends AppCompatActivity {
 
-    private static final float MIN_FONT_SIZE = 35; // Adjust the minimum font size as needed
-    private static final float MAX_FONT_SIZE = 100; // Adjust the maximum font size as needed
-    private static final float FONT_SCALE_FACTOR = 1.1f; // Adjust the scale factor as needed
+    private static final float MIN_FONT_SIZE = 35;  
+    private static final float MAX_FONT_SIZE = 100;  
+    private static final float FONT_SCALE_FACTOR = 1.1f;  
     private static final String PREF_FILE_NAME = "LikedStoriesPrefs";
     private static final String LIKED_STORIES_KEY = "likedStories";
     private TextView storyContentView;
@@ -44,7 +44,7 @@ public class StoryDisplay extends AppCompatActivity {
             initializeViews(rootView);
             setStory(this, rootView, selectedDocId);
         } else {
-            // Handle the case where selectedDocId is -1
+             
         }
     }
 
@@ -93,23 +93,23 @@ public class StoryDisplay extends AppCompatActivity {
         TextView nameView = rootView.findViewById(R.id.StoryName);
         storyContentView = rootView.findViewById(R.id.StoryContent);
 
-        // Initialize increase and decrease font size buttons
+         
         ImageButton increaseFontSizeButton = rootView.findViewById(R.id.increaseFontSizeButton);
         ImageButton decreaseFontSizeButton = rootView.findViewById(R.id.decreaseFontSizeButton);
 
-        // Initialize like button
+         
         starButton = rootView.findViewById(R.id.likeButton);
         starButton.setVisibility(View.VISIBLE);
         updateStarButtonAppearance();
 
-        // Set a click listener for the star button
+         
         starButton.setOnClickListener(v -> toggleLikeStatus());
 
-        // Set click listeners for font size buttons
+         
         increaseFontSizeButton.setOnClickListener(v -> increaseFontSize());
         decreaseFontSizeButton.setOnClickListener(v -> decreaseFontSize());
 
-        // Check if the current story is liked and update the like button
+         
         isLiked = isStoryLiked(this, selectedDocId);
         updateLikeButtonState(starButton);
     }
@@ -118,26 +118,26 @@ public class StoryDisplay extends AppCompatActivity {
 
     private void updateStarButtonAppearance() {
         if (isLiked) {
-            // Story is liked, set filled star drawable
+             
             starButton.setImageResource(R.drawable.ic_star_filled);
         } else {
-            // Story is not liked, set outline star drawable
+             
             starButton.setImageResource(R.drawable.ic_star_outline);
         }
     }
 
     private void toggleLikeStatus() {
         toggleLike();
-        updateStarButtonAppearance(); // Update the appearance after toggling
+        updateStarButtonAppearance();  
     }
 
     private void toggleLike() {
         isLiked = !isLiked;
 
-        // Update the like button state
+         
         updateLikeButtonState(starButton);
 
-        // Add or remove the story from liked stories
+         
         if (isLiked) {
             addLikedStory(this, selectedDocId);
         } else {
@@ -151,7 +151,7 @@ public class StoryDisplay extends AppCompatActivity {
     }
 
     private SQLiteDatabase connectToDatabase(Context context) {
-        // Open the database
+         
         String dbPath = context.getFilesDir() + "/corpus.db";
         return SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
     }
@@ -166,37 +166,37 @@ public class StoryDisplay extends AppCompatActivity {
                 String content = cursor.getString(1);
 
                 if (storyName == null || storyName.isEmpty() || content == null || content.isEmpty()) {
-                    // Handle the case where storyName or content is empty
+                     
                 } else {
                     TextView nameView = view.findViewById(R.id.StoryName);
                     TextView storyContentView = view.findViewById(R.id.StoryContent);
 
                     nameView.setText(storyName);
 
-                    // Replace newline characters with HTML line break tags
+                     
                     content = content.replace("\n", "<br>");
 
-                    // Use HtmlCompat to handle HTML tags
+                     
                     Spanned formattedContent = HtmlCompat.fromHtml(content, HtmlCompat.FROM_HTML_MODE_LEGACY);
 
-                    // Convert the SpannedString to a String
+                     
                     String plainTextContent = formattedContent.toString();
 
                     storyContentView.setText(plainTextContent);
                 }
             } else {
-                // Handle the case where the cursor doesn't move to the first position
+                 
             }
             cursor.close();
             db.close();
         } else {
-            // Handle the case where the database is null
+             
         }
     }
 
 
     private void increaseFontSize() {
-        // Increase the font size gradually
+         
         float currentSize = storyContentView.getTextSize();
         float newSize = currentSize * FONT_SCALE_FACTOR;
 
@@ -208,15 +208,15 @@ public class StoryDisplay extends AppCompatActivity {
     }
 
     private void decreaseFontSize() {
-        // Decrease the font size gradually
+         
         float currentSize = storyContentView.getTextSize();
-        float newSize = currentSize * 0.9f; // Decrease by 10%
+        float newSize = currentSize * 0.9f;  
 
         if (newSize >= MIN_FONT_SIZE) {
-            storyContentView.setTextAppearance(android.R.style.TextAppearance_Medium); // Reset to medium size
+            storyContentView.setTextAppearance(android.R.style.TextAppearance_Medium);  
             storyContentView.setTextSize(newSize / getResources().getDisplayMetrics().density);
         } else {
-            // Handle the case where the new size is less than the minimum size
+             
         }
     }
 }

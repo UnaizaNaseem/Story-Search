@@ -1,4 +1,4 @@
-package com.midterm.storysearch;// RecentStoriesManager.java
+package com.midterm.storysearch; 
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public class RecentStoriesManager {
 
     public void addRecentStory(RecentStory recentStory) {
         readHistory.add(recentStory);
-        // Add logic to limit the read history to the last 5 stories
+         
         if (readHistory.size() > 5) {
             readHistory.remove(0);
         }
