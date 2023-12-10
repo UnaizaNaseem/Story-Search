@@ -2,6 +2,7 @@ package com.midterm.storysearch;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -15,9 +16,20 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.text.HtmlCompat;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class StoryDisplay extends AppCompatActivity {
 
-    private TextView storyContentView; // Declare the TextView for story content
+    private static final float MIN_FONT_SIZE = 35; // Adjust the minimum font size as needed
+    private static final float MAX_FONT_SIZE = 100; // Adjust the maximum font size as needed
+    private static final float FONT_SCALE_FACTOR = 1.1f; // Adjust the scale factor as needed
+    private static final String PREF_FILE_NAME = "LikedStoriesPrefs";
+    private static final String LIKED_STORIES_KEY = "likedStories";
+    private TextView storyContentView;
+    private int selectedDocId;
+    private boolean isLiked;
+    private ImageButton starButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,23 +37,59 @@ public class StoryDisplay extends AppCompatActivity {
         setContentView(R.layout.activity_story_display);
 
         Intent intent = getIntent();
-        int selectedDocId = intent.getIntExtra("selectedDocId", -1);
+        selectedDocId = intent.getIntExtra("selectedDocId", -1);
 
         if (selectedDocId != -1) {
             View rootView = findViewById(android.R.id.content);
-            initializeViews(rootView, selectedDocId);
+            initializeViews(rootView);
+            setStory(this, rootView, selectedDocId);
         } else {
             // Handle the case where selectedDocId is -1
         }
     }
 
-    private SQLiteDatabase connectToDatabase(Context context) {
-        // Open the database
-        String dbPath = context.getFilesDir() + "/corpus.db";
-        return SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
+
+    private boolean isStoryLiked(Context context, int docId) {
+        List<Integer> likedStories = getLikedStories(context);
+        return likedStories.contains(docId);
     }
 
-    private void initializeViews(View rootView, int selectedDocId) {
+    private void addLikedStory(Context context, int docId) {
+        List<Integer> likedStories = getLikedStories(context);
+        likedStories.add(docId);
+        saveLikedStories(context, likedStories);
+    }
+
+    private void removeLikedStory(Context context, int docId) {
+        List<Integer> likedStories = getLikedStories(context);
+        likedStories.remove(Integer.valueOf(docId));
+        saveLikedStories(context, likedStories);
+    }
+
+    private List<Integer> getLikedStories(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        String likedStoriesString = prefs.getString(LIKED_STORIES_KEY, "");
+        String[] likedStoriesArray = likedStoriesString.split(",");
+        List<Integer> likedStories = new ArrayList<>();
+        for (String storyId : likedStoriesArray) {
+            if (!storyId.isEmpty()) {
+                likedStories.add(Integer.parseInt(storyId));
+            }
+        }
+        return likedStories;
+    }
+
+    private void saveLikedStories(Context context, List<Integer> likedStories) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        StringBuilder likedStoriesString = new StringBuilder();
+        for (Integer storyId : likedStories) {
+            likedStoriesString.append(storyId).append(",");
+        }
+        prefs.edit().putString(LIKED_STORIES_KEY, likedStoriesString.toString()).apply();
+    }
+
+
+    private void initializeViews(View rootView) {
         TextView nameView = rootView.findViewById(R.id.StoryName);
         storyContentView = rootView.findViewById(R.id.StoryContent);
 
@@ -49,47 +97,64 @@ public class StoryDisplay extends AppCompatActivity {
         ImageButton increaseFontSizeButton = rootView.findViewById(R.id.increaseFontSizeButton);
         ImageButton decreaseFontSizeButton = rootView.findViewById(R.id.decreaseFontSizeButton);
 
+        // Initialize like button
+        starButton = rootView.findViewById(R.id.likeButton);
+        starButton.setVisibility(View.VISIBLE);
+        updateStarButtonAppearance();
+
+        // Set a click listener for the star button
+        starButton.setOnClickListener(v -> toggleLikeStatus());
+
         // Set click listeners for font size buttons
         increaseFontSizeButton.setOnClickListener(v -> increaseFontSize());
         decreaseFontSizeButton.setOnClickListener(v -> decreaseFontSize());
 
-        setStory(this, rootView, selectedDocId);
+        // Check if the current story is liked and update the like button
+        isLiked = isStoryLiked(this, selectedDocId);
+        updateLikeButtonState(starButton);
     }
 
-    private static final float MIN_FONT_SIZE = 35; // Adjust the minimum font size as needed
-    private static final float MAX_FONT_SIZE = 100; // Adjust the maximum font size as needed
 
-    private static final float FONT_SCALE_FACTOR = 1.1f; // Adjust the scale factor as needed
 
-    private void increaseFontSize() {
-        // Increase the font size gradually
-        float currentSize = storyContentView.getTextSize();
-        float newSize = currentSize * FONT_SCALE_FACTOR;
-
-        if (newSize <= MAX_FONT_SIZE) {
-            storyContentView.setTextSize(TypedValue.COMPLEX_UNIT_PX, newSize);
+    private void updateStarButtonAppearance() {
+        if (isLiked) {
+            // Story is liked, set filled star drawable
+            starButton.setImageResource(R.drawable.ic_star_filled);
         } else {
-            // Handle the case where the new size is greater than the maximum size
-            Toast.makeText(this, "Max font size reached", Toast.LENGTH_SHORT).show();
+            // Story is not liked, set outline star drawable
+            starButton.setImageResource(R.drawable.ic_star_outline);
         }
     }
 
+    private void toggleLikeStatus() {
+        toggleLike();
+        updateStarButtonAppearance(); // Update the appearance after toggling
+    }
 
+    private void toggleLike() {
+        isLiked = !isLiked;
 
+        // Update the like button state
+        updateLikeButtonState(starButton);
 
-    private void decreaseFontSize() {
-        // Decrease the font size gradually
-        float currentSize = storyContentView.getTextSize();
-        float newSize = currentSize * 0.9f; // Decrease by 10%
-
-        if (newSize >= MIN_FONT_SIZE) {
-            storyContentView.setTextAppearance(android.R.style.TextAppearance_Medium); // Reset to medium size
-            storyContentView.setTextSize(newSize / getResources().getDisplayMetrics().density);
+        // Add or remove the story from liked stories
+        if (isLiked) {
+            addLikedStory(this, selectedDocId);
         } else {
-            // Handle the case where the new size is less than the minimum size
+            removeLikedStory(this, selectedDocId);
         }
     }
 
+    private void updateLikeButtonState(ImageButton likeButton) {
+        int likeIcon = isLiked ? R.drawable.ic_star_filled : R.drawable.ic_star_outline;
+        likeButton.setImageResource(likeIcon);
+    }
+
+    private SQLiteDatabase connectToDatabase(Context context) {
+        // Open the database
+        String dbPath = context.getFilesDir() + "/corpus.db";
+        return SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
+    }
 
     private void setStory(Context context, View view, int docId) {
         SQLiteDatabase db = connectToDatabase(context);
@@ -126,6 +191,32 @@ public class StoryDisplay extends AppCompatActivity {
             db.close();
         } else {
             // Handle the case where the database is null
+        }
+    }
+
+
+    private void increaseFontSize() {
+        // Increase the font size gradually
+        float currentSize = storyContentView.getTextSize();
+        float newSize = currentSize * FONT_SCALE_FACTOR;
+
+        if (newSize <= MAX_FONT_SIZE) {
+            storyContentView.setTextSize(TypedValue.COMPLEX_UNIT_PX, newSize);
+        } else {
+
+        }
+    }
+
+    private void decreaseFontSize() {
+        // Decrease the font size gradually
+        float currentSize = storyContentView.getTextSize();
+        float newSize = currentSize * 0.9f; // Decrease by 10%
+
+        if (newSize >= MIN_FONT_SIZE) {
+            storyContentView.setTextAppearance(android.R.style.TextAppearance_Medium); // Reset to medium size
+            storyContentView.setTextSize(newSize / getResources().getDisplayMetrics().density);
+        } else {
+            // Handle the case where the new size is less than the minimum size
         }
     }
 }
