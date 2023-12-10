@@ -28,7 +28,7 @@ public class SearchResultsFragment extends Fragment {
     private List<Integer> documentIDs;
 
     public SearchResultsFragment() {
-        // Required empty public constructor
+
     }
 
     public static SearchResultsFragment newInstance(String searchQuery, List<Integer> documentIDs) {
@@ -58,14 +58,14 @@ public class SearchResultsFragment extends Fragment {
 
         displaySearchedStories(view, documentIDs);
 
-        // Override the onBackPressed callback
+
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                // Clear the back stack
+
                 requireActivity().getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-                // Create a new instance of SearchScreen
+
                 Intent intent = new Intent(requireContext(), SearchScreen.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
@@ -77,12 +77,12 @@ public class SearchResultsFragment extends Fragment {
 
 
     private SQLiteDatabase connectToDatabase(Context context) {
-        // Open the database
+
         String dbPath = context.getFilesDir() + "/corpus.db";
         return SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
     }
 
-    private void displaySearchedStories(View view,List<Integer> documentIDs) {
+    private void displaySearchedStories(View view, List<Integer> documentIDs) {
         ListView listViewRandomStories = view.findViewById(R.id.listViewSearchResults);
 
         StoryAdapter adapter = new StoryAdapter(requireContext(), getStoryNamesWithStartingLines(requireContext()));
@@ -94,18 +94,18 @@ public class SearchResultsFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int selectedDocId = documentIDs.get(position);
 
-                // Assuming you have an adapter attached to the listViewRandomStories
+
                 StoryAdapter adapter = (StoryAdapter) parent.getAdapter();
 
                 if (adapter != null) {
-                    // Get the story information directly from the adapter
+
                     String storyDetails = adapter.getItem(position);
 
-                    // Split the story details using the newline character
+
                     String[] storyInfo = storyDetails.split("\n");
 
                     if (storyInfo.length >= 2) {
-                        // Extract story name and starting line
+
                         String storyName = storyInfo[0];
                         String startingLine = storyInfo[1];
 
@@ -120,6 +120,7 @@ public class SearchResultsFragment extends Fragment {
         });
 
     }
+
     private List<String> getStoryNamesWithStartingLines(Context context) {
         List<String> storyNamesWithStartingLines = new ArrayList<>();
         SQLiteDatabase db = connectToDatabase(context);
@@ -168,11 +169,10 @@ public class SearchResultsFragment extends Fragment {
     }
 
 
-
     private void openStoryScreen(int selectedDocId) {
 
-         Intent intent = new Intent(requireContext(), StoryDisplay.class);
-         intent.putExtra("selectedDocId", selectedDocId);
-         startActivity(intent);
+        Intent intent = new Intent(requireContext(), StoryDisplay.class);
+        intent.putExtra("selectedDocId", selectedDocId);
+        startActivity(intent);
     }
 }

@@ -1,4 +1,4 @@
-package com.midterm.storysearch;// RecentStoriesManager.java
+package com.midterm.storysearch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 public class RecentStoriesManager {
 
     private static RecentStoriesManager instance;
-    private List<RecentStory> readHistory;
+    private final List<RecentStory> readHistory;
 
     private RecentStoriesManager() {
         readHistory = new ArrayList<>();
@@ -21,7 +21,7 @@ public class RecentStoriesManager {
 
     public void addRecentStory(RecentStory recentStory) {
         readHistory.add(recentStory);
-        // Add logic to limit the read history to the last 5 stories
+
         if (readHistory.size() > 5) {
             readHistory.remove(0);
         }
@@ -32,9 +32,9 @@ public class RecentStoriesManager {
     }
 
     public static class RecentStory {
-        private int selectedDocId;
-        private String storyName;
-        private String startingLine;
+        private final int selectedDocId;
+        private final String storyName;
+        private final String startingLine;
 
         public RecentStory(int selectedDocId, String storyName, String startingLine) {
             this.selectedDocId = selectedDocId;

@@ -9,11 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import java.io.File;
@@ -26,7 +24,7 @@ public class RandomStoriesFragment extends Fragment {
     private List<Integer> randomDocIds;
 
     public RandomStoriesFragment() {
-        // Required empty public constructor
+
     }
 
     @Override
@@ -41,13 +39,12 @@ public class RandomStoriesFragment extends Fragment {
         ImageView reloadButton = view.findViewById(R.id.ReloadButton);
         reloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 onRandomizeButtonClick(view);
             }
         });
 
-        // Display random stories and wait for the UI to be fully updated
+
         view.post(new Runnable() {
             @Override
             public void run() {
@@ -88,18 +85,18 @@ public class RandomStoriesFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int selectedDocId = randomDocIds.get(position);
 
-                // Assuming you have an adapter attached to the listViewRandomStories
+
                 StoryAdapter adapter = (StoryAdapter) parent.getAdapter();
 
                 if (adapter != null) {
-                    // Get the story information directly from the adapter
+
                     String storyDetails = adapter.getItem(position);
 
-                    // Split the story details using the newline character
+
                     String[] storyInfo = storyDetails.split("\n");
 
                     if (storyInfo.length >= 2) {
-                        // Extract story name and starting line
+
                         String storyName = storyInfo[0];
                         String startingLine = storyInfo[1];
 
@@ -139,7 +136,6 @@ public class RandomStoriesFragment extends Fragment {
     }
 
 
-
     private void openStoryScreen(int selectedDocId) {
 
         Intent intent = new Intent(requireContext(), StoryDisplay.class);
@@ -148,7 +144,7 @@ public class RandomStoriesFragment extends Fragment {
     }
 
     private SQLiteDatabase connectToDatabase(Context context) {
-        // Open the database
+
         String dbPath = context.getFilesDir() + "/corpus.db";
         return SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
     }
@@ -169,7 +165,7 @@ public class RandomStoriesFragment extends Fragment {
 
         Random random = new Random();
         while (randomDocIds.size() < 4) {
-            int randomDocId = random.nextInt(totalStories) + 1; // Assuming docIds start from 1
+            int randomDocId = random.nextInt(totalStories) + 1;
             if (!randomDocIds.contains(randomDocId)) {
                 randomDocIds.add(randomDocId);
             }
@@ -186,6 +182,7 @@ public class RandomStoriesFragment extends Fragment {
         cursor.close();
         return totalStories;
     }
+
     private List<String> getStoryNamesWithStartingLines(Context context) {
         List<String> storyNamesWithStartingLines = new ArrayList<>();
         SQLiteDatabase db = connectToDatabase(context);
@@ -200,15 +197,15 @@ public class RandomStoriesFragment extends Fragment {
                     String storyName = cursor.getString(0);
                     String content = cursor.getString(1);
 
-                    // Check if the story is valid
+
                     if (isValidStory(storyName, content)) {
                         String startingLine = getStartingLine(content);
                         storyNamesWithStartingLines.add(storyName + "\n" + startingLine);
                     } else {
-                        // Replace problematic story with a new random one
+
                         int replacementDocId = findRandomDocId(db, randomDocIds);
                         randomDocIds.set(i, replacementDocId);
-                        i--; // Adjust the index to recheck the replaced story
+                        i--;
                     }
                 }
 
@@ -223,6 +220,7 @@ public class RandomStoriesFragment extends Fragment {
         return storyName != null && !storyName.isEmpty() &&
                 content != null && !content.isEmpty();
     }
+
     private int findRandomDocId(SQLiteDatabase db, List<Integer> excludeDocIds) {
         Random random = new Random();
         int totalStories = getTotalStories(db);
@@ -236,7 +234,7 @@ public class RandomStoriesFragment extends Fragment {
     }
 
     public void onRandomizeButtonClick(View view) {
-        // Reload and randomize the stories
+
         getRandomDocIds(requireContext());
         displayRandomStories(getView());
     }

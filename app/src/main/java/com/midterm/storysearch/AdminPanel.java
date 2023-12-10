@@ -52,10 +52,9 @@ public class AdminPanel extends AppCompatActivity {
                 if (AdminQuery.isEmpty()) {
                     showToast("Please enter a query");
                 } else {
-                    // Call the Python function with the user query
                     List<Integer> documentIDs = callPythonFunction(AdminQuery);
                     List<String> docTitles = getDocNames(appContext, documentIDs);
-                    displayNames(docTitles, docListView,AdminQuery);
+                    displayNames(docTitles, docListView, AdminQuery);
                 }
             }
         });
@@ -73,7 +72,6 @@ public class AdminPanel extends AppCompatActivity {
         searchResults = new ArrayList<>();
 
         for (PyObject item : pythonList) {
-            // Convert each PyObject to Java and then to Integer
             try {
                 Integer result = item.toJava(Integer.class);
                 searchResults.add(result);
@@ -97,7 +95,7 @@ public class AdminPanel extends AppCompatActivity {
     }
 
     private List<String> getDocNames(Context context, List<Integer> documentIDs) {
-        //get Document Names corresponding to DocID's from the database
+
         List<String> storyNames = new ArrayList<>();
 
         SQLiteDatabase db = connectToDatabase(context);
@@ -117,13 +115,11 @@ public class AdminPanel extends AppCompatActivity {
     }
 
     private SQLiteDatabase connectToDatabase(Context context) {
-        // Open the database
         String dbPath = context.getFilesDir() + "/corpus.db";
         return SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
     }
 
-    private void displayNames(final List<String> docTitles, final ListView listView,String adminQuery) {
-        // Set up the CustomAdapter
+    private void displayNames(final List<String> docTitles, final ListView listView, String adminQuery) {
         CustomAdapter adapter = new CustomAdapter(this, docTitles);
 
         listView.setAdapter(adapter);
@@ -143,10 +139,9 @@ public class AdminPanel extends AppCompatActivity {
                         public void onClick(View v) {
                             showToast("Remove button clicked for: " + docTitles.get(position));
                             removeStory(docTitles.get(position));
-                            // Refresh the ListView after removing the item
                             List<Integer> documentIDs = callPythonFunction(adminQuery);
                             List<String> docTitles = getDocNames(appContext, documentIDs);
-                            displayNames(docTitles, (ListView) findViewById(R.id.docListView),adminQuery);
+                            displayNames(docTitles, findViewById(R.id.docListView), adminQuery);
                         }
                     });
                 }
@@ -154,11 +149,9 @@ public class AdminPanel extends AppCompatActivity {
         });
     }
 
-    // Method to remove the story from the database
     private void removeStory(String storyName) {
         String storyNameToRemove = storyName;
 
-        // Example: Call a Python function to remove the story
         python.getModule("PythonCode").callAttr("remove_story_from_database", storyNameToRemove);
 
         showToast("Story removed: " + storyNameToRemove);
@@ -187,8 +180,6 @@ public class AdminPanel extends AppCompatActivity {
 
             storyNameTextView.setText(docTitle);
             removeButton.setVisibility(View.GONE);
-
-            // Set onClickListener for the remove button
             removeButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

@@ -1,4 +1,5 @@
 package com.midterm.storysearch;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;

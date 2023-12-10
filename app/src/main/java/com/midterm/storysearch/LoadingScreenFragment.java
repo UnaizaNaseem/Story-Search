@@ -20,7 +20,7 @@ public class LoadingScreenFragment extends Fragment {
     private ImageView typewriterImage;
 
     public LoadingScreenFragment() {
-        // Required empty public constructor
+
     }
 
     @Override
@@ -30,20 +30,20 @@ public class LoadingScreenFragment extends Fragment {
         loadingText = view.findViewById(R.id.loadingText);
         typewriterImage = view.findViewById(R.id.typewriterImage);
 
-        // Set up typewriter animation
+
         Animation typewriterAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.typewriter_animation);
         typewriterAnimation.setInterpolator(new LinearInterpolator());
         typewriterAnimation.setRepeatMode(Animation.RESTART);
         typewriterAnimation.setRepeatCount(Animation.INFINITE);
         typewriterImage.startAnimation(typewriterAnimation);
 
-        // Set up blinking animation for loadingText
+
         Animation blinkingAnimation = new AlphaAnimation(1, 0);
         blinkingAnimation.setDuration(100);
         blinkingAnimation.setInterpolator(new LinearInterpolator());
         blinkingAnimation.setRepeatMode(Animation.REVERSE);
         blinkingAnimation.setRepeatCount(Animation.INFINITE);
-        blinkingAnimation.setStartOffset(10); // Delay before starting
+        blinkingAnimation.setStartOffset(10);
         loadingText.startAnimation(blinkingAnimation);
 
         return view;
