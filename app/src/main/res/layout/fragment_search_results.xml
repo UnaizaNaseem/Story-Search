@@ -3,17 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RandomStoriesFragment">
+    tools:context=".SearchResultsFragment">
 
-    <!-- res/layout/fragment_random_stories.xml -->
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp"
-        tools:context=".RandomStoriesFragment">
+        android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -31,7 +27,6 @@
                 android:textStyle="bold"
                 android:gravity="left" />
 
-
         </LinearLayout>
 
         <ListView
@@ -43,5 +38,7 @@
             android:divider="@android:color/darker_gray"
             android:dividerHeight="0.5dp"
             android:listSelector="@android:color/darker_gray" />
+
+
     </LinearLayout>
 </FrameLayout>

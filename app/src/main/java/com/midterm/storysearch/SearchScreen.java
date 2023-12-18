@@ -8,8 +8,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,6 +26,7 @@ public class SearchScreen extends AppCompatActivity {
     private Python python;
     private Context appContext;
     private LoadingScreenFragment loadingScreenFragment;
+    boolean isStandardSearch = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +48,6 @@ public class SearchScreen extends AppCompatActivity {
         adminPanel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                 
                 Intent intent = new Intent(SearchScreen.this, AdminPanel.class);
                 startActivity(intent);
             }
@@ -65,8 +63,7 @@ public class SearchScreen extends AppCompatActivity {
         ImageView historyButton = findViewById(R.id.HistoryButton);
         historyButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 onHistoryButtonClick(view);
             }
         });
@@ -78,21 +75,14 @@ public class SearchScreen extends AppCompatActivity {
 
                 if (userQuery.isEmpty()) {
                     showToast("Please enter a query");
-                }
-                else
-                {
+                } else {
                     showLoadingScreen();
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                             
                             List<Integer> documentIDs = callPythonFunction(userQuery);
-
-                             
                             hideLoadingScreen();
-
-                             
-                            updateSearchResultsFragment(documentIDs, userQuery);
+                            updateSearchResultsFragment(documentIDs, userQuery,isStandardSearch);
                         }
                     }, 600);
                 }
@@ -106,22 +96,19 @@ public class SearchScreen extends AppCompatActivity {
 
         PyObject contentListObj = pythonCodeModule.callAttr("read_csv_content", appContext);
 
-        List<Integer> searchResults=new ArrayList<>();
+        List<Integer> searchResults = new ArrayList<>();
+
+
         if (contentListObj != null) {
-             
             PyObject conn = pythonCodeModule.callAttr("connect_to_database", appContext, contentListObj);
 
-             
             String index_path = "/data/user/0/com.midterm.storysearch/files/index.csv";
 
-             
             pythonCodeModule.callAttr("create_index", conn, index_path);
 
             List<PyObject> pythonList = pythonCodeModule.callAttr("search_documents", index_path, userQuery, appContext).asList();
-            searchResults = new ArrayList<>();
 
             for (PyObject item : pythonList) {
-                 
                 try {
                     Integer result = item.toJava(Integer.class);
                     searchResults.add(result);
@@ -138,59 +125,61 @@ public class SearchScreen extends AppCompatActivity {
 
             System.out.println("Search Results: " + searchResults);
 
-
+            if (searchResults.isEmpty()) {
+                isStandardSearch = false;
+                List<Integer> similarOrRandomStories = getRandomStories(); // Replace with actual logic
+                searchResults.addAll(similarOrRandomStories);
+            }
         }
 
+        updateSearchResultsFragment(searchResults, userQuery, isStandardSearch);
+
         return searchResults;
+    }
+
+    private List<Integer> getRandomStories() {
+        List<Integer> randomStories = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            int randomID = (int) (Math.random() * 450) + 1;
+            randomStories.add(randomID);
+        }
+        return randomStories;
     }
 
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
-    private void updateSearchResultsFragment(List<Integer> documentIDs, String userQuery) {
-         
+
+    private void updateSearchResultsFragment(List<Integer> documentIDs, String userQuery, boolean isStandardSearch) {
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-         
         RandomStoriesFragment randomStoriesFragment = new RandomStoriesFragment();
 
-         
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         fragmentTransaction.replace(R.id.fragmentContainerView, randomStoriesFragment);
         fragmentTransaction.addToBackStack(RandomStoriesFragment.class.getName());
 
-         
-        SearchResultsFragment searchResultsFragment = SearchResultsFragment.newInstance(userQuery, documentIDs);
+        SearchResultsFragment searchResultsFragment = SearchResultsFragment.newInstance(userQuery, documentIDs, isStandardSearch);
 
-         
         fragmentTransaction.replace(R.id.fragmentContainerView, searchResultsFragment);
 
         fragmentTransaction.commit();
     }
 
-
-
-
-
     private void showLoadingScreen() {
-         
         loadingScreenFragment = new LoadingScreenFragment();
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-         
         fragmentTransaction.replace(R.id.fragmentContainerView, loadingScreenFragment);
 
         fragmentTransaction.commit();
     }
 
-
-
     private void hideLoadingScreen() {
-         
         if (loadingScreenFragment != null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -199,12 +188,8 @@ public class SearchScreen extends AppCompatActivity {
         }
     }
 
-   private void  onHistoryButtonClick(View view)
-   {
-       Intent intent = new Intent(SearchScreen.this, ReadHistory.class);
-       startActivity(intent);
-   }
-
-
-
+    private void onHistoryButtonClick(View view) {
+        Intent intent = new Intent(SearchScreen.this, ReadHistory.class);
+        startActivity(intent);
+    }
 }

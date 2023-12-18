@@ -8,7 +8,7 @@ import nltk
 from nltk.corpus import words
 from nltk.stem import PorterStemmer
 from os.path import dirname, join
-from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 import string
 
 nltk.download('words')
@@ -37,7 +37,7 @@ def word_tokenize(text):
 def read_csv_content(context):
     try:
         csv_file_path = join(dirname(__file__), "ShortStories.csv")
-        df = pd.read_csv(csv_file_path, encoding='utf-8', nrows=500, usecols=['title', 'text'])
+        df = pd.read_csv(csv_file_path, encoding='utf-8', nrows=3100, usecols=['title', 'text'])
         print(df.head())
         return df
     except Exception as e:
@@ -93,13 +93,12 @@ def create_index(conn, index_path):
 
         print("Index file created successfully.")
 
-def search_documents(index_path, query, context, max_distance=15):
-    ranked_doc_ids = rank_documents(index_path, query, context, max_distance)
+
+def search_documents(index_path, query, context, max_distance=15, min_similarity=70):
+    ranked_doc_ids = rank_documents(index_path, query, context, max_distance, min_similarity)
     return ranked_doc_ids
 
-# Add the rank_documents and get_document_titles functions here
-
-def rank_documents(index_path, query, context, max_distance=15):
+def rank_documents(index_path, query, context, max_distance=15, min_similarity=70, max_results=20):
     words = word_tokenize(query)
     df = pd.read_csv(index_path)
     document_scores = {}
@@ -110,10 +109,31 @@ def rank_documents(index_path, query, context, max_distance=15):
             for doc_id in doc_ids:
                 document_scores[doc_id] = document_scores.get(doc_id, 0) + 1
 
+    # If no exact matches, try fuzzy matching
+    if not document_scores:
+        fuzzy_matches = find_fuzzy_matches(words, df['word'].values, min_similarity)
+        for match, similarity in fuzzy_matches:
+            doc_ids = ast.literal_eval(df[df['word'] == match]['doc_ids'].iloc[0])
+            for doc_id in doc_ids:
+                document_scores[doc_id] = document_scores.get(doc_id, 0) + similarity
+
     sorted_documents = sorted(document_scores.items(), key=lambda x: x[1], reverse=True)
     ranked_doc_ids = [doc_id for doc_id, _ in sorted_documents]
 
-    return ranked_doc_ids
+    # Return only the first 20 results if there are more than 20
+    return ranked_doc_ids[:max_results]
+
+
+def find_fuzzy_matches(words, candidates, min_similarity):
+    matches = []
+
+    for word in words:
+        match, similarity = process.extractOne(word, candidates)
+        if similarity >= min_similarity:
+            matches.append((match, similarity))
+
+    return matches
+
 
 def get_document_titles(context, doc_ids):
     db_path = os.path.join(str(context.getFilesDir()), "corpus.db")

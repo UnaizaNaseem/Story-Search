@@ -13,6 +13,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -23,19 +25,22 @@ public class SearchResultsFragment extends Fragment {
 
     private static final String ARG_SEARCH_QUERY = "searchQuery";
     private static final String ARG_DOCUMENT_IDS = "documentIds";
+    private static final String ARG_IS_STANDARD_SEARCH = "isStandardSearch";
 
     private String searchQuery;
     private List<Integer> documentIDs;
+    private boolean isStandardSearch;
 
     public SearchResultsFragment() {
-         
+        // Required empty public constructor
     }
 
-    public static SearchResultsFragment newInstance(String searchQuery, List<Integer> documentIDs) {
+    public static SearchResultsFragment newInstance(String searchQuery, List<Integer> documentIDs, boolean isStandardSearch) {
         SearchResultsFragment fragment = new SearchResultsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_SEARCH_QUERY, searchQuery);
-        args.putIntegerArrayList(ARG_DOCUMENT_IDS, new ArrayList<>(documentIDs));
+        args.putIntegerArrayList(ARG_DOCUMENT_IDS, (ArrayList<Integer>) documentIDs);
+        args.putBoolean(ARG_IS_STANDARD_SEARCH, isStandardSearch);
         fragment.setArguments(args);
         return fragment;
     }
@@ -46,6 +51,7 @@ public class SearchResultsFragment extends Fragment {
         if (getArguments() != null) {
             searchQuery = getArguments().getString(ARG_SEARCH_QUERY);
             documentIDs = getArguments().getIntegerArrayList(ARG_DOCUMENT_IDS);
+            isStandardSearch = getArguments().getBoolean(ARG_IS_STANDARD_SEARCH, true);
         }
     }
 
@@ -54,18 +60,18 @@ public class SearchResultsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_search_results, container, false);
 
         TextView titleTextView = view.findViewById(R.id.header);
-        titleTextView.setText("Showing Results for: " + searchQuery);
+        if (isStandardSearch) {
+            titleTextView.setText("Showing Results for: " + searchQuery);
+        } else {
+            titleTextView.setText("Could not find a match for: " + searchQuery + "\nYou may be interested in the following stories:");
+        }
 
         displaySearchedStories(view, documentIDs);
 
-         
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                 
                 requireActivity().getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-
-                 
                 Intent intent = new Intent(requireContext(), SearchScreen.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
@@ -75,37 +81,24 @@ public class SearchResultsFragment extends Fragment {
         return view;
     }
 
-
-    private SQLiteDatabase connectToDatabase(Context context) {
-         
-        String dbPath = context.getFilesDir() + "/corpus.db";
-        return SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
-    }
-
-    private void displaySearchedStories(View view,List<Integer> documentIDs) {
-        ListView listViewRandomStories = view.findViewById(R.id.listViewSearchResults);
+    private void displaySearchedStories(View view, List<Integer> documentIDs) {
+        ListView listViewSearchResults = view.findViewById(R.id.listViewSearchResults);
 
         StoryAdapter adapter = new StoryAdapter(requireContext(), getStoryNamesWithStartingLines(requireContext()));
+        listViewSearchResults.setAdapter(adapter);
 
-        listViewRandomStories.setAdapter(adapter);
-
-        listViewRandomStories.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listViewSearchResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 int selectedDocId = documentIDs.get(position);
 
-                 
                 StoryAdapter adapter = (StoryAdapter) parent.getAdapter();
 
                 if (adapter != null) {
-                     
                     String storyDetails = adapter.getItem(position);
-
-                     
                     String[] storyInfo = storyDetails.split("\n");
 
                     if (storyInfo.length >= 2) {
-                         
                         String storyName = storyInfo[0];
                         String startingLine = storyInfo[1];
 
@@ -118,8 +111,8 @@ public class SearchResultsFragment extends Fragment {
                 }
             }
         });
-
     }
+
     private List<String> getStoryNamesWithStartingLines(Context context) {
         List<String> storyNamesWithStartingLines = new ArrayList<>();
         SQLiteDatabase db = connectToDatabase(context);
@@ -167,12 +160,14 @@ public class SearchResultsFragment extends Fragment {
         }
     }
 
-
+    private SQLiteDatabase connectToDatabase(Context context) {
+        String dbPath = context.getFilesDir() + "/corpus.db";
+        return SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
+    }
 
     private void openStoryScreen(int selectedDocId) {
-
-         Intent intent = new Intent(requireContext(), StoryDisplay.class);
-         intent.putExtra("selectedDocId", selectedDocId);
-         startActivity(intent);
+        Intent intent = new Intent(requireContext(), StoryDisplay.class);
+        intent.putExtra("selectedDocId", selectedDocId);
+        startActivity(intent);
     }
 }
