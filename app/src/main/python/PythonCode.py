@@ -98,7 +98,7 @@ def search_documents(index_path, query, context, max_distance=15, min_similarity
     ranked_doc_ids = rank_documents(index_path, query, context, max_distance, min_similarity)
     return ranked_doc_ids
 
-def rank_documents(index_path, query, context, max_distance=15, min_similarity=70):
+def rank_documents(index_path, query, context, max_distance=15, min_similarity=70, max_results=20):
     words = word_tokenize(query)
     df = pd.read_csv(index_path)
     document_scores = {}
@@ -120,7 +120,9 @@ def rank_documents(index_path, query, context, max_distance=15, min_similarity=7
     sorted_documents = sorted(document_scores.items(), key=lambda x: x[1], reverse=True)
     ranked_doc_ids = [doc_id for doc_id, _ in sorted_documents]
 
-    return ranked_doc_ids
+    # Return only the first 20 results if there are more than 20
+    return ranked_doc_ids[:max_results]
+
 
 def find_fuzzy_matches(words, candidates, min_similarity):
     matches = []
